@@ -3,13 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
+    "@md5crypt/dragonbones-pixi": "^5.8.1",
     "next": "15.3.2",
+    "pixi.js": "^5.3.12",
+    "pixi5-dragonbones": "^5.7.0-2b",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

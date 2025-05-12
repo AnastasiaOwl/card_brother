@@ -1,10 +1,16 @@
 "use client";  
-import SpriteWalker from "../components/SpriteWolker";
 
 export default function Dashboard() {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gray-100">
-        <SpriteWalker speed={250} width={150} height={150}/>
-      </main>
+        <div style={{ width: 800, height: 600 }}>
+        <iframe
+          src="/dragonbones/girlAnimation.html"
+          width="100%"
+          height="100%"
+          style={{ border: 'none' }}
+          title="DragonBones Girl Animation"
+        />
+    </div>
+
     )
   }
