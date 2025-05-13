@@ -4,8 +4,8 @@ import WelcomeSplash from "../components/WelcomeSplash";
 export default function Dashboard() {
     return (
       <>
-        <WelcomeSplash />
-        {/* <div style={{ width: 200, height: 200 }}>
+      <div ><WelcomeSplash /></div>
+        <div style={{ width: 200, height: 200 }}>
         <iframe
           src="/dragonbones/girlAnimation.html"
           width="100%"
@@ -13,7 +13,7 @@ export default function Dashboard() {
           style={{ border: 'none' }}
           title="DragonBones Girl Animation"
         />
-    </div> */}
+    </div>
     </>
 
     )
