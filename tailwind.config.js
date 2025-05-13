@@ -1,23 +1,21 @@
 // tailwind.config.js
 module.exports = {
+  content: [
+    './pages/**/*.{js,jsx,ts,tsx}',
+    './components/**/*.{js,jsx,ts,tsx}',
+  ],
   theme: {
     extend: {
       keyframes: {
-        fadeOut: {
-          "0%, 40%": { opacity: "1" },
-          "60%,100%": { opacity: "0" },
-        },
-        fadeIn: {
-          "0%, 40%": { opacity: "0" },
-          "60%,100%": { opacity: "1" },
-        },
+        swoosh: {
+          '0%':   { 'offset-distance': '0%' },
+          '100%': { 'offset-distance': '100%' },
+        }
       },
       animation: {
-        fadeOut: "fadeOut 0.8s ease-in-out infinite",
-        fadeIn: "fadeIn 0.8s ease-in-out infinite",
-      },
-    },
+        'swoosh': 'swoosh 5s ease-in-out infinite',
+      }
+    }
   },
-};
-
-
+  plugins: [],
+}

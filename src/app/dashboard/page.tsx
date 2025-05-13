@@ -1,8 +1,11 @@
 "use client";  
+import WelcomeSplash from "../components/WelcomeSplash";
 
 export default function Dashboard() {
     return (
-        <div style={{ width: 800, height: 600 }}>
+      <>
+        <WelcomeSplash />
+        {/* <div style={{ width: 200, height: 200 }}>
         <iframe
           src="/dragonbones/girlAnimation.html"
           width="100%"
@@ -10,7 +13,8 @@ export default function Dashboard() {
           style={{ border: 'none' }}
           title="DragonBones Girl Animation"
         />
-    </div>
+    </div> */}
+    </>
 
     )
   }
