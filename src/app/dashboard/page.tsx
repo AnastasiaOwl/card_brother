@@ -6,7 +6,7 @@ export default function Dashboard() {
       <>
       <div className=" h-screen bg-yellow-200">
           <div ><WelcomeSplash /></div>
-          <div>
+          {/* <div>
             <iframe
               src="/dragonbones/girlAnimation.html"
               width="100%"
@@ -14,7 +14,7 @@ export default function Dashboard() {
               style={{ border: 'none' }}
               title="DragonBones Girl Animation"
             />
-          </div>
+          </div> */}
     </div>
       
     </>
