@@ -20,7 +20,6 @@ export default function BounceAndReveal({
   const [showImage, setShowImage] = useState(false);
   const kidSrc = "/images/boy.png";
 
-  // same blur & shadow filter as before…
   const stdDev = r * 0.45;
 
   return (
@@ -46,8 +45,6 @@ export default function BounceAndReveal({
           </feMerge>
         </filter>
       </defs>
-
-      {/* bounce + glow */}
       <AnimatePresence>
         {!showImage && (
           <motion.circle
@@ -64,29 +61,27 @@ export default function BounceAndReveal({
         )}
       </AnimatePresence>
 
-      {/* reveal + zoom */}
       <AnimatePresence>
         {showImage && (
           <motion.image
-  href={kidSrc}
-  x={cx - r}
-  y={cy - r}
-  width={r * 2}
-  height={r * 2}
-  initial={{ opacity: 0, scale: 0.8 }}
-  animate={{ opacity: 1, scale: 4}}
+            href={kidSrc}
+            x={cx - r}
+            y={cy - r}
+            width={r * 2}
+            height={r * 2}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 4}}
 
-  transition={{
-    opacity: { duration: 0.4, ease: "easeOut" },
-    scale: {
-      duration: 6,
-      ease: "easeInOut",
-      delay: 0.4,
-    },
-  }}
-  exit={{ opacity: 0 }}
-/>
-
+            transition={{
+              opacity: { duration: 0.4, ease: "easeOut" },
+              scale: {
+                duration: 6,
+                ease: "easeInOut",
+                delay: 0.4,
+              },
+            }}
+            exit={{ opacity: 0 }}
+          />
         )}
       </AnimatePresence>
     </svg>
