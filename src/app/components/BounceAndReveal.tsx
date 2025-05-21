@@ -1,8 +1,7 @@
-// components/BounceAndReveal.tsx
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence, useAnimation } from "framer-motion";
 
 interface BounceAndRevealProps {
   cx: number;
@@ -18,7 +17,60 @@ export default function BounceAndReveal({
   fill,
 }: BounceAndRevealProps) {
   const [showImage, setShowImage] = useState(false);
+  const controls = useAnimation();
   const kidSrc = "/images/boy.png";
+  const audioCtxRef    = useRef<AudioContext | null>(null);
+  const audioBufRef    = useRef<AudioBuffer | null>(null);
+
+  useEffect(() => {
+    const ctx = new AudioContext();
+    audioCtxRef.current = ctx;
+
+    fetch("/sounds/typing.mp3")
+      .then(res => res.arrayBuffer())
+      .then(data => ctx.decodeAudioData(data))
+      .then(buf => {
+        audioBufRef.current = buf;
+      });
+
+    // unlock on first user click
+    const unlock = () => {
+      if (ctx.state === "suspended") ctx.resume();
+    };
+    window.addEventListener("click", unlock, { once: true });
+    return () => window.removeEventListener("click", unlock);
+  }, []);
+
+  // 2) When we show the image: fade in → play buffer → zoom → stop
+  useEffect(() => {
+    if (!showImage) return;
+
+    (async () => {
+      // fade in
+      await controls.start(
+        { opacity: 1 },
+        { duration: 0.4, ease: "easeOut" }
+      );
+
+      // play via WebAudio
+      const ctx = audioCtxRef.current!;
+      const buf = audioBufRef.current!;
+      if (ctx.state === "running" && buf) {
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        src.connect(ctx.destination);
+        src.start();
+        // schedule a .stop() exactly when zoom ends
+        src.stop(ctx.currentTime + 6);
+      }
+
+      // run the 6s zoom
+      await controls.start(
+        { scale: 4 },
+        { duration: 6, ease: "easeInOut" }
+      );
+    })();
+  }, [showImage, controls]);
 
   const stdDev = r * 0.45;
 
