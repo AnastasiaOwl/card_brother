@@ -8,6 +8,7 @@ interface BounceAndRevealProps {
   cy: number;
   r: number;
   fill: string;
+  onZoomComplete?: () => void; 
 }
 
 export default function BounceAndReveal({
@@ -15,12 +16,14 @@ export default function BounceAndReveal({
   cy,
   r,
   fill,
+  onZoomComplete,
 }: BounceAndRevealProps) {
   const [showImage, setShowImage] = useState(false);
   const controls = useAnimation();
   const kidSrc = "/images/boy.png";
   const audioCtxRef    = useRef<AudioContext | null>(null);
   const audioBufRef    = useRef<AudioBuffer | null>(null);
+  const srcNodeRef = useRef<AudioBufferSourceNode | null>(null);
 
   useEffect(() => {
     const ctx = new AudioContext();
@@ -32,8 +35,6 @@ export default function BounceAndReveal({
       .then(buf => {
         audioBufRef.current = buf;
       });
-
-    // unlock on first user click
     const unlock = () => {
       if (ctx.state === "suspended") ctx.resume();
     };
@@ -41,18 +42,15 @@ export default function BounceAndReveal({
     return () => window.removeEventListener("click", unlock);
   }, []);
 
-  // 2) When we show the image: fade in → play buffer → zoom → stop
+
   useEffect(() => {
     if (!showImage) return;
 
     (async () => {
-      // fade in
       await controls.start(
         { opacity: 1 },
         { duration: 0.4, ease: "easeOut" }
       );
-
-      // play via WebAudio
       const ctx = audioCtxRef.current!;
       const buf = audioBufRef.current!;
       if (ctx.state === "running" && buf) {
@@ -60,15 +58,10 @@ export default function BounceAndReveal({
         src.buffer = buf;
         src.connect(ctx.destination);
         src.start();
-        // schedule a .stop() exactly when zoom ends
         src.stop(ctx.currentTime + 6);
+        srcNodeRef.current = src; 
       }
-
-      // run the 6s zoom
-      await controls.start(
-        { scale: 4 },
-        { duration: 6, ease: "easeInOut" }
-      );
+     controls.start({ scale: 4 }, { duration: 6, ease: "easeInOut" });
     })();
   }, [showImage, controls]);
 
@@ -133,6 +126,12 @@ export default function BounceAndReveal({
               },
             }}
             exit={{ opacity: 0 }}
+             onAnimationStart={() => {
+              onZoomComplete?.();
+            }}
+             onAnimationComplete={() => {
+             srcNodeRef.current?.stop();
+           }}
           />
         )}
       </AnimatePresence>

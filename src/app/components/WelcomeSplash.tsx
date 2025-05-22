@@ -10,6 +10,7 @@ interface WelcomeSplashProps {
   maxTrailTime?: number;
   baseRadius?: number;
   tailWidthFactor?: number;
+  onZoomComplete?: () => void; 
 }
 
 export default function WelcomeSplash({
@@ -19,6 +20,7 @@ export default function WelcomeSplash({
   maxTrailTime    = 800,
   baseRadius      = 40,
   tailWidthFactor = 2,
+  onZoomComplete,
 }: WelcomeSplashProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pathRef   = useRef<SVGPathElement>(null);
@@ -163,6 +165,7 @@ export default function WelcomeSplash({
         cy={post.y}
         r={baseRadius * post.scale}
         fill={color}
+        onZoomComplete={onZoomComplete} 
       />
     )}
   </>

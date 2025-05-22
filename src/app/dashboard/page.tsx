@@ -1,39 +1,43 @@
 "use client";
 
 import { useState, useRef, useEffect} from "react";
-import { motion } from "framer-motion";
+import { motion, useAnimation } from "framer-motion";
 import WelcomeSplash from "../components/WelcomeSplash";
 
 export default function Dashboard() {
-  const [hasInteracted, setHasInteracted] = useState(false);
-  const [walkStarted, setWalkStarted] = useState(false);
-  const [showStill,   setShowStill  ] = useState(false);
-  const [removed,     setRemoved    ] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState<boolean>(false);
+  const [showStill,   setShowStill  ] = useState<boolean>(false);
+  const [removed,     setRemoved    ] = useState<boolean>(false);
   const stepsAudioRef = useRef<HTMLAudioElement|null>(null);
+  const walkControls = useAnimation();
 
     useEffect(() => {
-    if (!walkStarted) return;
-    stepsAudioRef.current?.play();
-  }, [walkStarted]);
+    if (!hasInteracted) return;
+    const audio = stepsAudioRef.current!;
+    audio.preload = "auto";
+    audio.load();
 
-  useEffect(() => {
-    if (!showStill) return;
-    const audio = stepsAudioRef.current;
-    if (audio) {
-      audio.pause();
-      audio.currentTime = 0;
-    }
-  }, [showStill]);
-
+    audio.muted = true;
+    audio.play()
+      .then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.muted = false;
+      })
+      .catch(console.warn);
+  }, [hasInteracted]);
+  
   function handleFirstTap() {
     setHasInteracted(true);
-      const audio = new Audio("/sounds/footsteps.mp3");
-    audio.preload = "auto";
-    stepsAudioRef.current = audio;
-    setTimeout(() => setWalkStarted(true), 6000);
     setTimeout(() => setRemoved(true), 17000);
   }
 
+  const onZoomComplete = () => {
+    walkControls.start({
+      x: 0,
+      transition: { duration: 8, ease: "linear" },
+    });
+  };
 
   if (!hasInteracted) {
     return (
@@ -62,32 +66,51 @@ if (removed) {
 
   return (
     <div className="h-screen bg-yellow-200 relative overflow-hidden">
-      <WelcomeSplash />
+      <WelcomeSplash   onZoomComplete={onZoomComplete} />
 
-    {walkStarted && !showStill && !removed && (
-      <motion.div 
-      className="fixed top-[26%] left-[55%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-[9999]"
-          initial={{ x: "100vw" }}
-          animate={{ x: 0 }}
-          transition={{ duration: 8, ease: "linear" }}
-          onAnimationComplete={() => {
-            setShowStill(true);
-          }}
-        >
-        <iframe
-            src="/dragonbones/girlAnimation.html"
-            width={200}
-            height={300}
-            style={{
-              border:   "none",
-              position: "absolute",
-              top:      0,
-              left:     0,
-              zIndex:   1,
-            }}
-          />
-      </motion.div>
+    {hasInteracted && (
+      <audio
+        ref={stepsAudioRef}
+        src="/sounds/footsteps.mp3"
+        preload="auto"
+        onCanPlayThrough={() => console.log("footsteps buffered")}
+        onError={e => console.error("audio error", e)}
+      />
     )}
+      {!showStill && (
+        <motion.div 
+        className="fixed top-[26%] left-[55%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-[9999]"
+            initial={{ x: "100vw" }}
+            animate={walkControls}
+            onAnimationStart={() => {
+              const delay = 3000;
+              setTimeout(() => {
+                const audio = stepsAudioRef.current!;
+                audio.currentTime = 0;
+                audio.playbackRate = 1.5;   
+                audio.play().catch(console.error);
+              }, delay);
+            }}
+            onAnimationComplete={() => {
+              stepsAudioRef.current!.pause();
+              stepsAudioRef.current!.currentTime = 0;
+              setShowStill(true);
+            }}
+          >
+          <iframe
+              src="/dragonbones/girlAnimation.html"
+              width={200}
+              height={300}
+              style={{
+                border:   "none",
+                position: "absolute",
+                top:      0,
+                left:     0,
+                zIndex:   1,
+              }}
+            />
+        </motion.div>
+      )}
 
      {showStill && !removed && (
       <motion.img
