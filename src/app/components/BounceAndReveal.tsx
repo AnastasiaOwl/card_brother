@@ -20,6 +20,15 @@ export default function BounceAndReveal({
 }: BounceAndRevealProps) {
   const [showImage, setShowImage] = useState(false);
   const controls = useAnimation();
+
+  const popAudioRef = useRef<HTMLAudioElement>(
+    typeof Audio !== "undefined" ? (() => {
+     const audio = new Audio("/sounds/pop.mp3");
+     audio.volume = 0.1;
+     return audio;
+   })() : null
+  );
+  
   const kidSrc = "/images/boy.png";
   const audioCtxRef    = useRef<AudioContext | null>(null);
   const audioBufRef    = useRef<AudioBuffer | null>(null);
@@ -101,7 +110,12 @@ export default function BounceAndReveal({
             animate={{ cy: [cy, cy - r * 1.5, cy] }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             exit={{ opacity: 0 }}
-            onAnimationComplete={() => setShowImage(true)}
+            onAnimationComplete={() => {
+              const pop = popAudioRef.current!;
+              pop.currentTime = 0;
+              pop.play().catch(console.error);
+              setShowImage(true);
+            }}
           />
         )}
       </AnimatePresence>
