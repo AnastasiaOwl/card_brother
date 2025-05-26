@@ -11,6 +11,12 @@ export default function Dashboard() {
   const stepsAudioRef = useRef<HTMLAudioElement|null>(null);
   const walkControls = useAnimation();
   const introRef = useRef<HTMLAudioElement | null>(null);
+  const squeezeRef  = useRef<HTMLAudioElement>(
+    typeof Audio !== "undefined" ? (() => {
+     const audio = new Audio("/sounds/squeeze.mp3");
+     return audio;
+   })() : null
+  );
 
   useEffect(() => {
     const a = new Audio("/sounds/intro.mp3");
@@ -18,6 +24,13 @@ export default function Dashboard() {
     a.load();
     introRef.current = a;
   }, []);
+
+  useEffect(() => {
+  if (!removed) return;
+  const squeeze = squeezeRef.current!;
+  squeeze.currentTime = 0;
+  squeeze.play().catch(console.error);
+}, [removed]);
 
     useEffect(() => {
     if (!hasInteracted) return;
@@ -56,6 +69,11 @@ if (removed) {
         className="fixed top-[49%] left-[52%] -translate-x-1/2 -translate-y-1/2"
         style={{ width: 350, height: 350 }}
         transition={{ duration: 0.6, ease: "linear"}}
+        onAnimationComplete={() => {
+          const squeeze = squeezeRef.current!;
+          squeeze.currentTime = 0;
+          squeeze.play().catch(console.error);
+          }}
       />
     </div>
   );
