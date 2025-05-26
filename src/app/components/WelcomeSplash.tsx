@@ -10,6 +10,7 @@ interface WelcomeSplashProps {
   maxTrailTime?: number;
   baseRadius?: number;
   tailWidthFactor?: number;
+  introAudio: React.RefObject<HTMLAudioElement | null>;
   onZoomComplete?: () => void; 
 }
 
@@ -20,6 +21,7 @@ export default function WelcomeSplash({
   maxTrailTime    = 800,
   baseRadius      = 40,
   tailWidthFactor = 2,
+  introAudio,
   onZoomComplete,
 }: WelcomeSplashProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -29,13 +31,24 @@ export default function WelcomeSplash({
   const pointsRef = useRef<{ x: number; y: number; scale: number; t: number }[]>([]);
   const [post, setPost] = useState<{ x: number; y: number; scale: number } | null>(null);
 
-  useEffect(() => {
+   useEffect(() => {
+    const onClick = () => {
+      introAudio.current
+        ?.play()
+        .then(() => introAudio.current?.pause())
+        .catch(() => {});
+    };
+    window.addEventListener("click", onClick, { once: true });
+    return () => window.removeEventListener("click", onClick);
+  }, [introAudio]);
+
+    useEffect(() => {
     const onResize = () => {
       const cw = window.innerWidth;
       const ch = window.innerHeight;
       setSize({ w: cw, h: ch });
       if (canvasRef.current) {
-        canvasRef.current.width = cw;
+        canvasRef.current.width  = cw;
         canvasRef.current.height = ch;
       }
     };
@@ -57,10 +70,19 @@ export default function WelcomeSplash({
 
   useEffect(() => {
     if (!size.w || !size.h) return;
+
+    const audioEl = introAudio.current;
+    if (!audioEl) return;
+
+    audioEl.currentTime = 0;
+    audioEl.play().catch(() => {
+    });
+
     const canvas = canvasRef.current!;
     const ctx    = canvas.getContext("2d")!;
     const pathEl = pathRef.current!;
     const ballG  = ballRef.current!;
+
 
     const fillColor = color;
     const { r, g, b } = parseColor(fillColor);
@@ -77,6 +99,7 @@ export default function WelcomeSplash({
 
     let startTime: number | null = null;
     let lastSample = 0;
+    let didPost = false; 
 
     function animate(ts: number) {
       if (startTime === null) startTime = ts;
@@ -123,14 +146,16 @@ export default function WelcomeSplash({
 
       if (t01 < 1 || pointsRef.current.length > 0) {
         requestAnimationFrame(animate);
-      }
-      if (t01 >= 1 && pointsRef.current.length === 0 && !post) {
+      } else if (!didPost) {
+        audioEl!.pause();
+        audioEl!.currentTime = 0;
+
         setPost({ x: pt.x, y: pt.y, scale });
+        didPost = true;
       }
     }
-
     requestAnimationFrame(animate);
-  }, [size, color, duration, sampleInterval, maxTrailTime, baseRadius, tailWidthFactor]);
+  }, [size, color, duration, sampleInterval, maxTrailTime, baseRadius,introAudio, tailWidthFactor]);
 
  return (
   <>
@@ -171,4 +196,3 @@ export default function WelcomeSplash({
   </>
 );
 }
-

@@ -10,6 +10,14 @@ export default function Dashboard() {
   const [removed,     setRemoved    ] = useState<boolean>(false);
   const stepsAudioRef = useRef<HTMLAudioElement|null>(null);
   const walkControls = useAnimation();
+  const introRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    const a = new Audio("/sounds/intro.mp3");
+    a.preload = "auto";
+    a.load();
+    introRef.current = a;
+  }, []);
 
     useEffect(() => {
     if (!hasInteracted) return;
@@ -29,7 +37,7 @@ export default function Dashboard() {
   
   function handleFirstTap() {
     setHasInteracted(true);
-    setTimeout(() => setRemoved(true), 17000);
+    setTimeout(() => setRemoved(true), 14500);
   }
 
   const onZoomComplete = () => {
@@ -38,17 +46,6 @@ export default function Dashboard() {
       transition: { duration: 8, ease: "linear" },
     });
   };
-
-  if (!hasInteracted) {
-    return (
-      <div
-        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-        onClick={handleFirstTap}
-      >
-        <p className="text-white text-2xl">тапни будь-де</p>
-      </div>
-    );
-  }
 
 if (removed) {
   return (
@@ -66,8 +63,13 @@ if (removed) {
 
   return (
     <div className="h-screen bg-yellow-200 relative overflow-hidden">
-      <WelcomeSplash   onZoomComplete={onZoomComplete} />
 
+      {hasInteracted && (
+        <WelcomeSplash
+          introAudio={introRef}
+          onZoomComplete={onZoomComplete}
+        />
+      )}
     {hasInteracted && (
       <audio
         ref={stepsAudioRef}
@@ -76,6 +78,14 @@ if (removed) {
         onCanPlayThrough={() => console.log("footsteps buffered")}
         onError={e => console.error("audio error", e)}
       />
+    )}
+     {!hasInteracted && (
+      <div
+        className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+        onClick={handleFirstTap}
+      >
+        <p className="text-white text-2xl">тапни будь-де</p>
+      </div>
     )}
       {!showStill && (
         <motion.div 
