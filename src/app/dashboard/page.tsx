@@ -3,6 +3,12 @@
 import { useState, useRef, useEffect} from "react";
 import { motion, useAnimation } from "framer-motion";
 import WelcomeSplash from "../components/WelcomeSplash";
+import dynamic from 'next/dynamic';
+
+const HandwritingSVG = dynamic(
+  () => import('../components/HandwritingSVG'),
+  { ssr: false }
+);
 
 export default function Dashboard() {
   const [hasInteracted, setHasInteracted] = useState<boolean>(false);
@@ -17,6 +23,7 @@ export default function Dashboard() {
      return audio;
    })() : null
   );
+  const finalRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     const a = new Audio("/sounds/intro.mp3");
@@ -25,14 +32,21 @@ export default function Dashboard() {
     introRef.current = a;
   }, []);
 
+useEffect(() => {
+  const finalAudio = new Audio("/sounds/final.mp3");
+  finalAudio.preload = "auto";
+  finalAudio.load();
+  finalRef.current = finalAudio;
+}, []);
+
   useEffect(() => {
   if (!removed) return;
   const squeeze = squeezeRef.current!;
   squeeze.currentTime = 0;
   squeeze.play().catch(console.error);
-}, [removed]);
+  }, [removed]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (!hasInteracted) return;
     const audio = stepsAudioRef.current!;
     audio.preload = "auto";
@@ -47,6 +61,20 @@ export default function Dashboard() {
       })
       .catch(console.warn);
   }, [hasInteracted]);
+
+useEffect(() => {
+  if (!removed) return;
+  const timer = setTimeout(() => {
+    const finalAudio = finalRef.current;
+    if (finalAudio) {
+      finalAudio.currentTime = 0;
+      finalAudio.play().catch(console.error);
+    }
+  }, 1500);
+  return () => clearTimeout(timer);
+}, [removed]);
+
+
   
   function handleFirstTap() {
     setHasInteracted(true);
@@ -62,18 +90,24 @@ export default function Dashboard() {
 
 if (removed) {
   return (
-    <div className="h-screen bg-yellow-200 relative overflow-hidden">
+     <div className="w-screen h-screen flex flex-col items-center justify-center space-y-40 bg-yellow-200">
+      <HandwritingSVG
+        text="Найкращому брату, дякую що ти завжди поряд"
+        fontUrl="/fonts/Handwriting.ttf"
+        fontSize={50}
+      />
       <motion.img
         src="/images/hug.png"
         alt="Boy and girl hugging"
         className="fixed top-[49%] left-[52%] -translate-x-1/2 -translate-y-1/2"
         style={{ width: 350, height: 350 }}
-        transition={{ duration: 0.6, ease: "linear"}}
-        onAnimationComplete={() => {
-          const squeeze = squeezeRef.current!;
-          squeeze.currentTime = 0;
-          squeeze.play().catch(console.error);
-          }}
+        initial={{ top: "49%" }}         
+        animate={{ top: "75%" }}         
+        transition={{
+          delay: 0.9,                    
+          duration: 0.95,                 
+          ease: "linear"
+        }}
       />
     </div>
   );
@@ -82,12 +116,12 @@ if (removed) {
   return (
     <div className="h-screen bg-yellow-200 relative overflow-hidden">
 
-      {hasInteracted && (
+    {hasInteracted && (
         <WelcomeSplash
           introAudio={introRef}
           onZoomComplete={onZoomComplete}
         />
-      )}
+    )}
     {hasInteracted && (
       <audio
         ref={stepsAudioRef}
@@ -139,7 +173,6 @@ if (removed) {
             />
         </motion.div>
       )}
-
      {showStill && !removed && (
       <motion.img
         key="still"
