@@ -4,6 +4,8 @@ import { useState, useRef, useEffect} from "react";
 import { motion, useAnimation } from "framer-motion";
 import WelcomeSplash from "../components/WelcomeSplash";
 import dynamic from 'next/dynamic';
+import Player from "lottie-react";
+import sparklesJson from "../../app/sparkles.json";
 
 const HandwritingSVG = dynamic(
   () => import('../components/HandwritingSVG'),
@@ -24,6 +26,16 @@ export default function Dashboard() {
    })() : null
   );
   const finalRef = useRef<HTMLAudioElement | null>(null);
+  const [confettiList, setConfettiList] = useState<
+    { x: number; y: number; key: string }[]
+  >([]);
+
+   function handleConfettiTap(e: React.MouseEvent<HTMLDivElement>) {
+    const x = e.clientX;
+    const y = e.clientY;
+    const key = `${Date.now()}-${Math.random()}`;
+    setConfettiList((list) => [...list, { x, y, key }]);
+  }
 
   useEffect(() => {
     const a = new Audio("/sounds/intro.mp3");
@@ -90,7 +102,31 @@ useEffect(() => {
 
 if (removed) {
   return (
-     <div className="w-screen h-[100dvh] flex flex-col items-center justify-center lg:space-y-40 md:space-y-20 bg-yellow-200">
+     <div className="w-screen h-[100dvh] flex flex-col items-center justify-center lg:space-y-40 md:space-y-20 bg-yellow-200"
+     onClick={handleConfettiTap}>
+      {confettiList.map(({ x, y, key }) => (
+          <div
+            key={key}
+            className="pointer-events-none fixed"
+            style={{
+              left: x,
+              top: y,
+              width: 140,
+              height: 140,
+              transform: "translate(-50%,-50%)",
+              zIndex: 1000,
+            }}
+          >
+        <Player
+            autoplay
+            animationData={sparklesJson}
+            style={{ width: "100%", height: "100%" }}
+             onComplete={() => {
+              setConfettiList(list => list.filter(c => c.key !== key));
+            }}
+          />
+          </div>
+        ))}
       <HandwritingSVG
         text="Найкращому брату, дякую що ти завжди поряд"
         fontUrl="/fonts/Handwriting.ttf"
