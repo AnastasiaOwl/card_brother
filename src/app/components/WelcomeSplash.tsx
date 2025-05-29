@@ -19,8 +19,8 @@ export default function WelcomeSplash({
   duration        = 3.5,
   sampleInterval  = 16,
   maxTrailTime    = 800,
-  baseRadius      = 40,
   tailWidthFactor = 2,
+  baseRadius: baseRadiusProp = 40, 
   introAudio,
   onZoomComplete,
 }: WelcomeSplashProps) {
@@ -30,6 +30,21 @@ export default function WelcomeSplash({
   const [size, setSize] = useState({ w: 0, h: 0 });
   const pointsRef = useRef<{ x: number; y: number; scale: number; t: number }[]>([]);
   const [post, setPost] = useState<{ x: number; y: number; scale: number } | null>(null);
+  const [baseRadius, setBaseRadius] = useState(baseRadiusProp);
+
+  useEffect(() => {
+    function updateRadius() {
+      if (window.innerWidth < 800) {
+        setBaseRadius(20);
+      } else {
+        setBaseRadius(baseRadiusProp);
+      }
+    }
+    updateRadius();
+    window.addEventListener('resize', updateRadius);
+    return () => window.removeEventListener('resize', updateRadius);
+  }, [baseRadiusProp]);
+
 
    useEffect(() => {
     const onClick = () => {

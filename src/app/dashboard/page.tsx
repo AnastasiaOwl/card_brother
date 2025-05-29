@@ -90,7 +90,7 @@ useEffect(() => {
 
 if (removed) {
   return (
-     <div className="w-screen h-screen flex flex-col items-center justify-center space-y-40 bg-yellow-200">
+     <div className="w-screen h-[100dvh] flex flex-col items-center justify-center lg:space-y-40 md:space-y-20 bg-yellow-200">
       <HandwritingSVG
         text="Найкращому брату, дякую що ти завжди поряд"
         fontUrl="/fonts/Handwriting.ttf"
@@ -99,8 +99,7 @@ if (removed) {
       <motion.img
         src="/images/hug.png"
         alt="Boy and girl hugging"
-        className="fixed top-[49%] left-[52%] -translate-x-1/2 -translate-y-1/2"
-        style={{ width: 350, height: 350 }}
+        className="fixed top-[49%] left-[52%] lg:w-[350px] lg:h-[350px] md:w-[180px] md:h-[180px] -translate-x-1/2 -translate-y-1/2"
         initial={{ top: "49%" }}         
         animate={{ top: "75%" }}         
         transition={{
@@ -114,7 +113,7 @@ if (removed) {
 }
 
   return (
-    <div className="h-screen bg-yellow-200 relative overflow-hidden">
+    <div className="h-[100dvh]  bg-yellow-200 relative overflow-hidden">
 
     {hasInteracted && (
         <WelcomeSplash
@@ -141,7 +140,7 @@ if (removed) {
     )}
       {!showStill && (
         <motion.div 
-        className="fixed top-[26%] left-[55%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-[9999]"
+        className="fixed lg:top-[26%] left-[55%] md:top-[23%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-[9999]"
             initial={{ x: "100vw" }}
             animate={walkControls}
             onAnimationStart={() => {
@@ -161,8 +160,7 @@ if (removed) {
           >
           <iframe
               src="/dragonbones/girlAnimation.html"
-              width={200}
-              height={300}
+              className="lg:w-[200px] lg:h-[300px] md:w-[100px] md:h-[148px]"
               style={{
                 border:   "none",
                 position: "absolute",
@@ -178,14 +176,13 @@ if (removed) {
         key="still"
         src="/images/girl_standing.png"
         alt="Girl standing"
-        style={{
-          position: "absolute",
-          top:      "26%",
-          left:     "55%",
-          width:200,
-          height:300,
-          zIndex:   2,
-        }}
+       className="
+          absolute
+          lg:top-[26%] md:top-[23%] left-[55%] 
+          lg:w-[200px] lg:h-[300px]
+          md:w-[100px] md:h-[148px]
+          z-20
+        "
         transition={{ duration: 0, ease: "linear" }}
       />
     )}
