@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
-import opentype, { Path} from 'opentype.js';
+import * as opentype from 'opentype.js';
+
 
 type PathCommand = {
   type: string;
@@ -11,6 +12,18 @@ type PathCommand = {
   x2?: number;
   y2?: number;
 };
+
+interface MinimalGlyph {
+  getPath: (x: number, y: number, fontSize: number) => opentype.Path;
+  advanceWidth: number;
+}
+
+
+interface FontWithMethods extends opentype.Font {
+  charToGlyph: (s: string) => MinimalGlyph;
+  unitsPerEm: number;
+}
+
 
 interface Props {
   text: string;
@@ -40,10 +53,10 @@ export default function HandwritingSVG({ text, fontUrl, fontSize }: Props) {
       let x = 0;
       const y = baseFontSize * 1.1;
       const paths: LetterPath[] = [];
-
+      const realFont = font as FontWithMethods;
       for (let i = 0; i < text.length; i++) {
         const char = text[i];
-        const glyph = font.charToGlyph(char);
+        const glyph = realFont.charToGlyph(char);
         const glyphPath = glyph.getPath(x, y, baseFontSize);
         
         const scaledCommands = glyphPath.commands.map((cmd: PathCommand) => {
@@ -58,13 +71,13 @@ export default function HandwritingSVG({ text, fontUrl, fontSize }: Props) {
           return newCmd;
         });
         
-        const scaledPath = new Path();
+        const scaledPath = new opentype.Path();
 
         scaledPath.commands = scaledCommands;
 
         paths.push({ d: scaledPath.toPathData(), key: `${char}-${i}` });
 
-        x += glyph.advanceWidth * (fontSize / font.unitsPerEm);
+        x += glyph.advanceWidth * (fontSize / realFont.unitsPerEm);
       }
       setLetterPaths(paths);
     });
